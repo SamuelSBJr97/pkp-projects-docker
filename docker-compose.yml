@@ -1,0 +1,94 @@
+version: '3.8'
+services:
+  db:
+    image: mariadb:10.6
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: pkp
+      MYSQL_USER: pkpuser
+      MYSQL_PASSWORD: pkppass
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - pkpnet
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+    networks:
+      - pkpnet
+
+  ojs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ojs
+    volumes:
+      - ./src/ojs-3.5.0-1/:/var/www/html/
+    environment:
+      - PKP_DB_HOST=db
+      - PKP_DB_NAME=pkp
+      - PKP_DB_USER=pkpuser
+      - PKP_DB_PASSWORD=pkppass
+      - PKP_MAIL_HOST=mailhog
+      - PKP_MAIL_PORT=1025
+    depends_on:
+      - db
+      - mailhog
+    ports:
+      - "8081:80"
+    networks:
+      - pkpnet
+
+  omp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omp
+    volumes:
+      - ./src/omp-3.5.0-1/:/var/www/html/
+    environment:
+      - PKP_DB_HOST=db
+      - PKP_DB_NAME=pkp
+      - PKP_DB_USER=pkpuser
+      - PKP_DB_PASSWORD=pkppass
+      - PKP_MAIL_HOST=mailhog
+      - PKP_MAIL_PORT=1025
+    depends_on:
+      - db
+      - mailhog
+    ports:
+      - "8082:80"
+    networks:
+      - pkpnet
+
+  ops:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ops
+    volumes:
+      - ./src/ops-3.4.0-9/:/var/www/html/
+    environment:
+      - PKP_DB_HOST=db
+      - PKP_DB_NAME=pkp
+      - PKP_DB_USER=pkpuser
+      - PKP_DB_PASSWORD=pkppass
+      - PKP_MAIL_HOST=mailhog
+      - PKP_MAIL_PORT=1025
+    depends_on:
+      - db
+      - mailhog
+    ports:
+      - "8083:80"
+    networks:
+      - pkpnet
+
+volumes:
+  db_data:
+
+networks:
+  pkpnet:
+    driver: bridge
