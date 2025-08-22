@@ -10,8 +10,11 @@ services:
       MYSQL_PASSWORD: pkppass
     volumes:
       - db_data:/var/lib/mysql
+      - ./db-performance.cnf:/etc/mysql/conf.d/db-performance.cnf
     networks:
       - pkpnet
+    # Para usar mytop, execute no terminal do container:
+    # apt-get update && apt-get install -y mytop
 
   mailhog:
     image: mailhog/mailhog
