@@ -1,22 +1,31 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Garante permissões corretas para cache/opcache
-done
-for app in src/ojs-3.5.0-1 src/omp-3.5.0-1 src/ops-3.4.0-9; do
-  if [ -d "$app/cache/opcache" ]; then
-    chown -R www-data:www-data "$app/cache"
-    chmod -R 775 "$app/cache"
-  fi
-  # Cria subdiretórios se não existirem
-  mkdir -p "$app/cache/opcache"
-  # Opcional: cria subdiretórios comuns
-  for d in 6f 6f/6f; do
-    mkdir -p "$app/cache/opcache/$d"
-    chown www-data:www-data "$app/cache/opcache/$d"
-    chmod 775 "$app/cache/opcache/$d"
+APP_ROOT="/var/www/html"
+CACHE_DIRS=(cache cache/_db cache/t_cache cache/t_compile cache/t_config cache/opcache)
+
+echo "[entrypoint] Ajustando permissões em ${APP_ROOT}"
+
+if [ -d "$APP_ROOT" ]; then
+  for d in "${CACHE_DIRS[@]}"; do
+    mkdir -p "$APP_ROOT/$d"
   done
-done
+  # Subdir extra para opcache (estrutura que alguns scripts esperam)
+  mkdir -p "$APP_ROOT/cache/opcache/6f/6f"
+  chown -R www-data:www-data "$APP_ROOT/cache"
+  chmod -R 775 "$APP_ROOT/cache"
+fi
 
-# Inicia o Apache
-exec apache2-foreground
+# Define ini customizado via env vars
+PHP_INI_DIR="/usr/local/etc/php/conf.d"
+CUSTOM_INI="${PHP_INI_DIR}/zz-pkp.ini"
+cat > "$CUSTOM_INI" <<EOF
+memory_limit = ${PHP_MEMORY_LIMIT:-512M}
+upload_max_filesize = ${PHP_UPLOAD_MAX_FILESIZE:-50M}
+post_max_size = ${PHP_POST_MAX_SIZE:-60M}
+opcache.validate_timestamps = ${OPCACHE_VALIDATE_TIMESTAMPS:-1}
+opcache.revalidate_freq = ${OPCACHE_REVALIDATE_FREQ:-2}
+EOF
+
+echo "[entrypoint] Iniciando Apache"
+exec "$@"
