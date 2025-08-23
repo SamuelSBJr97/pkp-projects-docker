@@ -1,0 +1,106 @@
+services:
+  db:
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_DB: pkp
+      POSTGRES_USER: pkpuser
+      POSTGRES_PASSWORD: pkppass
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - pkpnet
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pkpuser -d pkp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mailhog:
+    image: mailhog/mailhog
+    ports:
+      - "8025:8025"
+    networks:
+      - pkpnet
+
+  ojs:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ojs
+    volumes:
+      - ./src/ojs-3.5.0-1/:/var/www/html/
+      - ojs_files:/var/www/html/files
+    environment:
+      - PKP_DB_HOST=db
+      - PKP_DB_NAME=pkp
+      - PKP_DB_USER=pkpuser
+      - PKP_DB_PASSWORD=pkppass
+      - PKP_DB_DRIVER=pgsql
+      - PKP_MAIL_HOST=mailhog
+      - PKP_MAIL_PORT=1025
+    depends_on:
+      - db
+      - mailhog
+    ports:
+      - "8081:80"
+    networks:
+      - pkpnet
+
+  omp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: omp
+    volumes:
+      - ./src/omp-3.5.0-1/:/var/www/html/
+      - omp_files:/var/www/html/files
+    environment:
+      - PKP_DB_HOST=db
+      - PKP_DB_NAME=pkp
+      - PKP_DB_USER=pkpuser
+      - PKP_DB_PASSWORD=pkppass
+      - PKP_DB_DRIVER=pgsql
+      - PKP_MAIL_HOST=mailhog
+      - PKP_MAIL_PORT=1025
+    depends_on:
+      - db
+      - mailhog
+    ports:
+      - "8082:80"
+    networks:
+      - pkpnet
+
+  ops:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ops
+    volumes:
+      - ./src/ops-3.4.0-9/:/var/www/html/
+      - ops_files:/var/www/html/files
+    environment:
+      - PKP_DB_HOST=db
+      - PKP_DB_NAME=pkp
+      - PKP_DB_USER=pkpuser
+      - PKP_DB_PASSWORD=pkppass
+      - PKP_DB_DRIVER=pgsql
+      - PKP_MAIL_HOST=mailhog
+      - PKP_MAIL_PORT=1025
+    depends_on:
+      - db
+      - mailhog
+    ports:
+      - "8083:80"
+    networks:
+      - pkpnet
+
+volumes:
+  db_data:
+  ojs_files:
+  omp_files:
+  ops_files:
+
+networks:
+  pkpnet:
+    driver: bridge
