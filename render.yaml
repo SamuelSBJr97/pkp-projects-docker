@@ -1,0 +1,39 @@
+services:
+  - type: web
+    name: ojs
+    env: docker
+    rootDir: .
+    dockerfilePath: src/Dockerfile
+    plan: free
+    autoDeploy: true
+    envVars:
+      - key: PHP_MEMORY_LIMIT
+        value: 512M
+      - key: PHP_UPLOAD_MAX_FILESIZE
+        value: 50M
+      - key: PHP_POST_MAX_SIZE
+        value: 60M
+      - key: OPCACHE_VALIDATE_TIMESTAMPS
+        value: "1"
+      - key: OPCACHE_REVALIDATE_FREQ
+        value: "2"
+      - key: APP_ENV
+        value: production
+      - key: DB_DRIVER
+        value: pgsql
+      - key: DB_HOST
+        value: YOUR_RENDER_PG_HOST
+      - key: DB_PORT
+        value: "5432"
+      - key: DB_NAME
+        value: ojs
+      - key: DB_USER
+        value: ojsuser
+      - key: DB_PASSWORD
+        sync: false          # definir no dashboard
+      - key: FILES_DIR
+        value: /var/www/ojs-files
+    disk:
+      name: ojs-files
+      mountPath: /var/www/ojs-files
+      sizeGB: 1
