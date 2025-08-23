@@ -44,6 +44,10 @@ RUN set -eux; \
 
 WORKDIR /var/www/html
 
+# Copia o código do OJS para dentro da imagem (necessário em plataformas como Render onde não há volume bind)
+# Estrutura atual: build context aponta para diretório externo 'src', e o código está em 'src/ojs-3.5.0-1/' dentro dele.
+COPY src/ojs-3.5.0-1/ /var/www/html/
+
 # Script de entrada que aplica permissões e inicia o Apache
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 RUN chmod +x /usr/local/bin/docker-entrypoint.sh

@@ -2,7 +2,7 @@ services:
   - type: web
     name: ojs
     env: docker
-    rootDir: .
+    rootDir: src
     dockerfilePath: src/Dockerfile
     plan: free
     autoDeploy: true
