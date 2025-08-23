@@ -1,0 +1,53 @@
+{
+	"description": "A published version of a preprint.",
+	"required": [
+		"sectionId"
+	],
+	"properties": {
+		"accessStatus": {
+			"type": "integer",
+			"default": 0,
+			"validation": [
+				"nullable"
+			]
+		},
+		"galleys": {
+			"type": "array",
+			"apiSummary": true,
+			"readOnly": true,
+			"items": {
+				"$ref": "#/definitions/Galley"
+			}
+		},
+		"hideAuthor": {
+			"type": "boolean",
+			"description": "Whether the contributor details should be displayed for this publication. Commonly used for editorial statements without individual authorship.",
+			"default": false,
+			"validation": [
+				"nullable"
+			]
+		},
+		"sectionId": {
+			"type": "integer",
+			"apiSummary": true
+		},
+		"relationStatus": {
+			"type": "integer",
+			"description": "Whether this preprint is submitted or published in a journal.",
+			"apiSummary": true,
+			"default": 1,
+			"validation": [
+				"in:1,2,3"
+			]
+		},
+		"vorDoi": {
+			"type": "string",
+			"description": "The DOI of the VOR version.",
+			"apiSummary": true,
+			"validation": [
+				"nullable",
+				"url"
+			]
+		}
+	}
+}
