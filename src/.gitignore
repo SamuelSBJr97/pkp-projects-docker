@@ -1,7 +1,7 @@
 # Diretórios e arquivos de dependências
 node_modules/
 vendor/
-
+### PHP & Composer ###
 # Arquivos de configuração sensíveis
 src/**/config.inc.php
 src/**/config.TEMPLATE.inc.php
